@@ -84,9 +84,9 @@ namespace FubarDev.WebDavServer.FileSystem
 
             if (maxDepth > 0)
             {
-                using (var entries = EnumerateEntries(collection, maxDepth - 1).GetEnumerator())
+                await using (var entries = EnumerateEntries(collection, maxDepth - 1).GetAsyncEnumerator(cancellationToken))
                 {
-                    while (await entries.MoveNext(cancellationToken).ConfigureAwait(false))
+                    while (await entries.MoveNextAsync().ConfigureAwait(false))
                     {
                         var entry = entries.Current;
                         var parent = entry.Parent;
@@ -132,6 +132,11 @@ namespace FubarDev.WebDavServer.FileSystem
                 _remainingDepth = remainingDepth;
             }
 
+            public IAsyncEnumerator<IEntry> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+            {
+                return new FileSystemEntriesEnumerator(_collection, _children, _startDepth, _remainingDepth, cancellationToken);
+            }
+
             public IAsyncEnumerator<IEntry> GetEnumerator()
             {
                 return new FileSystemEntriesEnumerator(_collection, _children, _startDepth, _remainingDepth);
@@ -148,12 +153,14 @@ namespace FubarDev.WebDavServer.FileSystem
                 private int _currentDepth;
 
                 private IEnumerator<IEntry> _entries;
+                private CancellationToken _canellationToken;
 
-                public FileSystemEntriesEnumerator([NotNull] ICollection collection, [CanBeNull] [ItemNotNull] IReadOnlyCollection<IEntry> children, int startDepth, int maxDepth)
+                public FileSystemEntriesEnumerator([NotNull] ICollection collection, [CanBeNull] [ItemNotNull] IReadOnlyCollection<IEntry> children, int startDepth, int maxDepth, CancellationToken ct = default)
                 {
                     _maxDepth = maxDepth;
                     _currentDepth = startDepth;
                     _collections.Enqueue(new CollectionInfo(collection, children, startDepth));
+                    _canellationToken = ct;
                 }
 
                 public IEntry Current { get; private set; }
@@ -161,6 +168,12 @@ namespace FubarDev.WebDavServer.FileSystem
                 public void Dispose()
                 {
                     _entries?.Dispose();
+                }
+
+                public ValueTask DisposeAsync()
+                {
+                    Dispose();
+                    return ValueTask.CompletedTask;
                 }
 
                 public async Task<bool> MoveNext(CancellationToken cancellationToken)
@@ -218,6 +231,11 @@ namespace FubarDev.WebDavServer.FileSystem
                     }
 
                     return hasCurrent;
+                }
+
+                public async ValueTask<bool> MoveNextAsync()
+                {
+                    return await MoveNext(_canellationToken);
                 }
 
                 private struct CollectionInfo

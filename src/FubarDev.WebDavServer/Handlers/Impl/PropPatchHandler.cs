@@ -21,6 +21,7 @@ using FubarDev.WebDavServer.Props.Live;
 using FubarDev.WebDavServer.Utils;
 
 using JetBrains.Annotations;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace FubarDev.WebDavServer.Handlers.Impl
 {
@@ -105,9 +106,9 @@ namespace FubarDev.WebDavServer.Handlers.Impl
             try
             {
                 var propertiesList = new List<IUntypedReadableProperty>();
-                using (var propEnum = targetEntry.GetProperties(_context.Dispatcher, returnInvalidProperties: true).GetEnumerator())
+                await using (var propEnum = targetEntry.GetProperties(_context.Dispatcher, returnInvalidProperties: true).GetAsyncEnumerator(cancellationToken))
                 {
-                    while (await propEnum.MoveNext(cancellationToken).ConfigureAwait(false))
+                    while (await propEnum.MoveNextAsync().ConfigureAwait(false))
                     {
                         propertiesList.Add(propEnum.Current);
                     }

@@ -100,9 +100,9 @@ namespace FubarDev.WebDavServer.Handlers.Impl
                     }
 
                     var remainingDepth = depth.OrderValue - (depth != DepthHeader.Infinity ? 1 : 0);
-                    using (var entriesEnumerator = collector.GetEntries(remainingDepth).GetEnumerator())
+                    await using (var entriesEnumerator = collector.GetEntries(remainingDepth).GetAsyncEnumerator(cancellationToken))
                     {
-                        while (await entriesEnumerator.MoveNext(cancellationToken).ConfigureAwait(false))
+                        while (await entriesEnumerator.MoveNextAsync().ConfigureAwait(false))
                         {
                             entries.Add(entriesEnumerator.Current);
                         }
@@ -271,9 +271,9 @@ namespace FubarDev.WebDavServer.Handlers.Impl
                 }
 
                 var propElements = new List<XElement>();
-                using (var propsEnumerator = entry.GetProperties(_host.Dispatcher, maxCost).GetEnumerator())
+                await using (var propsEnumerator = entry.GetProperties(_host.Dispatcher, maxCost).GetAsyncEnumerator(cancellationToken))
                 {
-                    while (await propsEnumerator.MoveNext(cancellationToken).ConfigureAwait(false))
+                    while (await propsEnumerator.MoveNextAsync().ConfigureAwait(false))
                     {
                         var property = propsEnumerator.Current;
 
@@ -347,9 +347,9 @@ namespace FubarDev.WebDavServer.Handlers.Impl
                 }
 
                 var propElements = new List<XElement>();
-                using (var propsEnumerator = entry.GetProperties(_host.Dispatcher).GetEnumerator())
+                await using (var propsEnumerator = entry.GetProperties(_host.Dispatcher).GetAsyncEnumerator(cancellationToken))
                 {
-                    while (await propsEnumerator.MoveNext(cancellationToken).ConfigureAwait(false))
+                    while (await propsEnumerator.MoveNextAsync().ConfigureAwait(false))
                     {
                         var property = propsEnumerator.Current;
 

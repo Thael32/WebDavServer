@@ -59,6 +59,12 @@ namespace FubarDev.WebDavServer.Props
             _returnInvalidProperties = returnInvalidProperties;
         }
 
+        /// <inheritdoc/>
+        public IAsyncEnumerator<IUntypedReadableProperty> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+        {
+            return new PropertiesEnumerator(_entry, _predefinedProperties, _propertyStore, _maxCost, _returnInvalidProperties, cancellationToken);
+        }
+
         /// <inheritdoc />
         public IAsyncEnumerator<IUntypedReadableProperty> GetEnumerator()
         {
@@ -83,6 +89,7 @@ namespace FubarDev.WebDavServer.Props
             private readonly Dictionary<XName, IUntypedReadableProperty> _emittedProperties = new Dictionary<XName, IUntypedReadableProperty>();
 
             private bool _predefinedPropertiesFinished;
+            private CancellationToken _cancellationToken;
 
             [CanBeNull]
             private IEnumerator<IDeadProperty> _deadPropertiesEnumerator;
@@ -92,7 +99,8 @@ namespace FubarDev.WebDavServer.Props
                 [NotNull] [ItemNotNull] IEnumerable<IUntypedReadableProperty> predefinedProperties,
                 [CanBeNull] IPropertyStore propertyStore,
                 int? maxCost,
-                bool returnInvalidProperties)
+                bool returnInvalidProperties,
+                CancellationToken cancellationToken = default)
             {
                 _entry = entry;
                 _propertyStore = propertyStore;
@@ -108,13 +116,23 @@ namespace FubarDev.WebDavServer.Props
                 }
 
                 _predefinedPropertiesEnumerator = predefinedPropertiesList.GetEnumerator();
+                _cancellationToken = cancellationToken;
             }
 
             public IUntypedReadableProperty Current { get; private set; }
 
-#pragma warning disable IDE1006 // Benennungsstile
+            public async ValueTask<bool> MoveNextAsync()
+            {
+                return await MoveNext(_cancellationToken);
+            }
+
+            public ValueTask DisposeAsync()
+            {
+                Dispose();
+                return ValueTask.CompletedTask;
+            }
+
             public async Task<bool> MoveNext(CancellationToken cancellationToken)
-#pragma warning restore IDE1006 // Benennungsstile
             {
                 while (true)
                 {
@@ -185,6 +203,7 @@ namespace FubarDev.WebDavServer.Props
 
                 return _deadPropertiesEnumerator.Current;
             }
+
         }
     }
 }

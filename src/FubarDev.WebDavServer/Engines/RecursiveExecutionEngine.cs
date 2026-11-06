@@ -187,9 +187,9 @@ namespace FubarDev.WebDavServer.Engines
         private async Task<List<IUntypedWriteableProperty>> GetWriteableProperties(IEntry entry, CancellationToken cancellationToken)
         {
             var properties = new List<IUntypedWriteableProperty>();
-            using (var propsEnum = entry.GetProperties(_handler.Dispatcher).GetEnumerator())
+            await using (var propsEnum = entry.GetProperties(_handler.Dispatcher).GetAsyncEnumerator(cancellationToken))
             {
-                while (await propsEnum.MoveNext(cancellationToken).ConfigureAwait(false))
+                while (await propsEnum.MoveNextAsync().ConfigureAwait(false))
                 {
                     var prop = propsEnum.Current as IUntypedWriteableProperty;
                     if (prop != null)

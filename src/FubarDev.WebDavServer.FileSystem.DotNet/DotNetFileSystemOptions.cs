@@ -34,5 +34,10 @@ namespace FubarDev.WebDavServer.FileSystem.DotNet
         /// Gets or sets a value indicating whether infinite path depth is allowed
         /// </summary>
         public bool AllowInfiniteDepth { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether user home path is used or root path should always be used
+        /// </summary>
+        public bool UseUserHomePath { get; set; } = true;
     }
 }
