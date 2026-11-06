@@ -203,7 +203,6 @@ namespace FubarDev.WebDavServer.Props
 
                 return _deadPropertiesEnumerator.Current;
             }
-
         }
     }
 }

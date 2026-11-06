@@ -81,7 +81,9 @@ namespace FubarDev.WebDavServer.Handlers.Impl
                 if (returnFile)
                     throw new NotSupportedException();
                 Debug.Assert(selectionResult.Collection != null, "selectionResult.Collection != null");
-                return new WebDavCollectionResult(selectionResult.Collection);
+
+                // return OK for found folder (fix for EPSON)
+                return new WebDavResult(WebDavStatusCode.OK);
             }
 
             Debug.Assert(selectionResult.Document != null, "selectionResult.Document != null");

@@ -20,6 +20,7 @@ using FubarDev.WebDavServer.Utils;
 using JetBrains.Annotations;
 
 using Microsoft.Extensions.Logging;
+using Lock = FubarDev.WebDavServer.Locking.Lock;
 
 namespace FubarDev.WebDavServer.Handlers.Impl
 {

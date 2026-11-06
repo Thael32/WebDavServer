@@ -21,6 +21,7 @@ using FubarDev.WebDavServer.Props.Live;
 using FubarDev.WebDavServer.Utils;
 
 using JetBrains.Annotations;
+using Lock = FubarDev.WebDavServer.Locking.Lock;
 using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace FubarDev.WebDavServer.Handlers.Impl
